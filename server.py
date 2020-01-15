@@ -2,6 +2,7 @@
 
 import logging
 import sys
+import time
 
 from wsgiref.simple_server import make_server
 from pyramid.config import Configurator
@@ -56,7 +57,8 @@ def handle_client(request):
     #print(id(hash))
     out, err = client.run_command(SCRIPT)
     with open("%s.txt" % client.hostname, "a") as file:
-        print("%s:\nOUT:%s\nERR:%s\n" % (client.hostname, out, err), file=file)
+        print(">>> %s: %s:\nOUT:%s\nERR:%s\n" % (
+            time.ctime(), client.hostname, out, err), file=file)
     return Response('OK %s\r\n' % request.POST['id'])
 
 
