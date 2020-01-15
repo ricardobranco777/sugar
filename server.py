@@ -6,6 +6,7 @@ Server
 import logging
 import sys
 import time
+import concurrent.futures
 
 from wsgiref.simple_server import make_server
 from pyramid.config import Configurator
@@ -51,10 +52,31 @@ class Client:
         return out, err
 
 
-@view_config(route_name='register', request_method='POST')
-def handle_client(request):
+def run_command(client, command):
     """
-    Handle client request
+    Run command on a client and log stdout & stderr
+    """
+    out, err = client.run_command(command)
+    with open("%s.txt" % client.hostname, "a") as file:
+        print(">>> %s: %s:\nOUT:%s\nERR:%s\n" % (
+            time.ctime(), client.hostname, out, err), file=file)
+
+
+@view_config(route_name='run', request_method='POST')
+def run(request):
+    """
+    /run
+    """
+    command = request.POST['command']
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        executor.map(lambda client: run_command(client, command), CLIENTS.values())
+    return Response('OK\r\n')
+
+
+@view_config(route_name='register', request_method='POST')
+def register(request):
+    """
+    /register
     """
     machine_id = request.POST['id']
     if machine_id in CLIENTS and request.client_addr != CLIENTS[machine_id].hostname:
@@ -67,10 +89,6 @@ def handle_client(request):
         response = Response('SSH Error\r\n')
         response.status_int = 500
         return response
-    out, err = client.run_command(SCRIPT)
-    with open("%s.txt" % client.hostname, "a") as file:
-        print(">>> %s: %s:\nOUT:%s\nERR:%s\n" % (
-            time.ctime(), client.hostname, out, err), file=file)
     return Response('OK %s\r\n' % request.POST['id'])
 
 
@@ -79,7 +97,8 @@ def main():
     Main function
     """
     with Configurator() as config:
-        config.add_route('register', '/')
+        config.add_route('register', '/register')
+        config.add_route('run', '/run')
         config.scan()
         app = config.make_wsgi_app()
     server = make_server('0.0.0.0', PORT, app)
