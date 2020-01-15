@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+"""
+Server
+"""
 
 import logging
 import sys
@@ -24,6 +27,10 @@ CLIENTS = {}
 
 @Singleton
 class Client:
+    """
+    Client class
+    """
+
     def __init__(self, hostname, username="root", password=None):
         self.hostname = hostname
         self.ssh = paramiko.SSHClient()
@@ -32,10 +39,13 @@ class Client:
         self.ssh.connect(hostname=hostname, username=username, password=password)
 
     def __del__(self):
-        logging.info("Closing connection to %s\n" % self.hostname)
+        logging.info("Closing connection to %s\n", self.hostname)
         self.ssh.close()
 
     def run_command(self, command):
+        """
+        Runs command on the client
+        """
         _, out, err = self.ssh.exec_command(command)
         out, err = map(lambda f: f.read().decode(), (out, err))
         return out, err
@@ -43,6 +53,9 @@ class Client:
 
 @view_config(route_name='register', request_method='POST')
 def handle_client(request):
+    """
+    Handle client request
+    """
     machine_id = request.POST['id']
     if machine_id in CLIENTS and request.client_addr != CLIENTS[machine_id].hostname:
         del CLIENTS[machine_id]
@@ -54,7 +67,6 @@ def handle_client(request):
         response = Response('SSH Error\r\n')
         response.status_int = 500
         return response
-    #print(id(hash))
     out, err = client.run_command(SCRIPT)
     with open("%s.txt" % client.hostname, "a") as file:
         print(">>> %s: %s:\nOUT:%s\nERR:%s\n" % (
@@ -63,6 +75,9 @@ def handle_client(request):
 
 
 def main():
+    """
+    Main function
+    """
     with Configurator() as config:
         config.add_route('register', '/')
         config.scan()

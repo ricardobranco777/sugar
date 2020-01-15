@@ -1,3 +1,7 @@
+"""
+Helper classes and functions
+"""
+
 import threading
 from weakref import WeakValueDictionary
 
