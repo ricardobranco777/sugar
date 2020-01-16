@@ -55,4 +55,6 @@ For the `/run` endpoint:
 - Docker image to have all dependencies packed with Python 3.
 - Nginx for TLS (to be run alongside the Docker image for the app using Docker Compose).
 - Fix bugs & introduce new ones.
+- Add tests.
+- Use CI for automatic testing.
 - Embrace, extend, and extinguish: Replace Salt, Puppet, Chef & Ansible.
