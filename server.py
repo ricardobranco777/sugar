@@ -21,7 +21,6 @@ from utils import Singleton
 
 
 PORT = 9999
-USERNAME = "ricardo"
 CLIENTS = {}
 
 
@@ -82,10 +81,14 @@ def register(request):
         address = request.POST['address']
     except KeyError:
         address = request.client_addr
+    try:
+        username = request.POST['username']
+    except KeyError:
+        username = "root"
     if machine_id in CLIENTS and address != CLIENTS[machine_id].hostname:
         del CLIENTS[machine_id]
     try:
-        client = Client(request.client_addr, username=USERNAME)
+        client = Client(request.client_addr, username=username)
         CLIENTS[machine_id] = client
     except (SSHException, OSError) as error:
         logging.error(error)
