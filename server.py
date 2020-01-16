@@ -18,26 +18,23 @@ from pyramid.view import view_config
 import paramiko
 from paramiko.ssh_exception import SSHException
 
-from utils import Singleton
-
 
 PORT = 9999
 CLIENTS = {}
 RUN_LOCK = threading.RLock()
 
 
-@Singleton
 class Client:
     """
     Client class
     """
-
     def __init__(self, hostname, username="root", password=None):
         self.hostname = hostname
         self.ssh = paramiko.SSHClient()
         self.ssh.load_system_host_keys()
         self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy)
-        self.ssh.connect(hostname=hostname, username=username, password=password)
+        self.ssh.connect(
+            hostname=hostname, username=username, password=password)
 
     def __del__(self):
         logging.info("Closing connection to %s\n", self.hostname)
@@ -70,7 +67,7 @@ def run(request):
     with RUN_LOCK:
         command = request.POST['command']
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.map(lambda client: run_command(client, command), CLIENTS.values())
+            executor.map(lambda c: run_command(c, command), CLIENTS.values())
         return Response('OK\r\n')
 
 
@@ -79,7 +76,7 @@ def register(request):
     """
     /register
     """
-    machine_id = request.POST['id']
+    id_ = request.POST['id']
     try:
         address = request.POST['address']
     except KeyError:
@@ -88,16 +85,17 @@ def register(request):
         username = request.POST['username']
     except KeyError:
         username = "root"
-    if machine_id in CLIENTS and address != CLIENTS[machine_id].hostname:
-        del CLIENTS[machine_id]
-    try:
-        client = Client(request.client_addr, username=username)
-        CLIENTS[machine_id] = client
-    except (SSHException, OSError) as error:
-        logging.error(error)
-        response = Response('SSH Error\r\n')
-        response.status_int = 500
-        return response
+    if id_ in CLIENTS:
+        if address != CLIENTS[id_].hostname:
+            del CLIENTS[id_]
+    else:
+        try:
+            CLIENTS[id_] = Client(request.client_addr, username=username)
+        except (SSHException, OSError) as error:
+            logging.error(error)
+            response = Response('SSH Error\r\n')
+            response.status_int = 500
+            return response
     return Response('OK %s\r\n' % request.POST['id'])
 
 
