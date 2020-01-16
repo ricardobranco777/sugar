@@ -90,7 +90,7 @@ def register(request):
             del CLIENTS[id_]
     else:
         try:
-            CLIENTS[id_] = Client(request.client_addr, username=username)
+            CLIENTS[id_] = Client(address, username=username)
         except (SSHException, OSError) as error:
             logging.error(error)
             response = Response('SSH Error\r\n')
