@@ -4,6 +4,7 @@ Server
 """
 
 import logging
+import os
 import sys
 import time
 import threading
@@ -37,7 +38,7 @@ class Client:
             hostname=hostname, username=username, password=password)
 
     def __del__(self):
-        logging.info("Closing connection to %s\n", self.hostname)
+        logging.info("Closing connection to %s", self.hostname)
         self.ssh.close()
 
     def run_command(self, command):
@@ -103,12 +104,19 @@ def main():
     """
     Main function
     """
+    log_format = "%(asctime)s %(levelname)-8s %(message)s"
+    log_level = "DEBUG" if 'DEBUG' in os.environ else "INFO"
+    logging.basicConfig(format=log_format, stream=sys.stderr, level=log_level)
     with Configurator() as config:
         config.add_route('register', '/register')
         config.add_route('run', '/run')
         config.scan()
         app = config.make_wsgi_app()
-    server = make_server('0.0.0.0', PORT, app)
+    try:
+        server = make_server('0.0.0.0', PORT, app)
+    except OSError as error:
+        logging.error(error)
+        sys.exit(1)
     server.serve_forever()
 
 
