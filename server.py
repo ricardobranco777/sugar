@@ -22,7 +22,6 @@ from utils import Singleton
 
 PORT = 9999
 USERNAME = "ricardo"
-SCRIPT = "ls /"
 CLIENTS = {}
 
 
@@ -79,7 +78,11 @@ def register(request):
     /register
     """
     machine_id = request.POST['id']
-    if machine_id in CLIENTS and request.client_addr != CLIENTS[machine_id].hostname:
+    try:
+        address = request.POST['address']
+    except KeyError:
+        address = request.client_addr
+    if machine_id in CLIENTS and address != CLIENTS[machine_id].hostname:
         del CLIENTS[machine_id]
     try:
         client = Client(request.client_addr, username=USERNAME)
