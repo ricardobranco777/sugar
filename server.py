@@ -21,6 +21,11 @@ from paramiko.ssh_exception import SSHException
 
 
 try:
+    LOGGING = os.environ['LOGGING']
+except KeyError:
+    LOGGING = "INFO"
+
+try:
     PORT = os.environ['PORT']
 except KeyError:
     PORT = 9999
@@ -115,8 +120,7 @@ def main():
     Main function
     """
     log_format = "%(asctime)s %(levelname)-8s %(message)s"
-    log_level = "DEBUG" if 'DEBUG' in os.environ else "INFO"
-    logging.basicConfig(format=log_format, stream=sys.stderr, level=log_level)
+    logging.basicConfig(format=log_format, stream=sys.stderr, level=LOGGING)
     with Configurator() as config:
         config.add_route('register', '/register')
         config.add_route('run', '/run')
