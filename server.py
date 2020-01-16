@@ -6,6 +6,7 @@ Server
 import logging
 import sys
 import time
+import threading
 import concurrent.futures
 
 from wsgiref.simple_server import make_server
@@ -22,6 +23,7 @@ from utils import Singleton
 
 PORT = 9999
 CLIENTS = {}
+RUN_LOCK = threading.RLock()
 
 
 @Singleton
@@ -56,7 +58,7 @@ def run_command(client, command):
     """
     out, err = client.run_command(command)
     with open("%s.txt" % client.hostname, "a") as file:
-        print(">>> %s: %s:\nOUT:%s\nERR:%s\n" % (
+        print(">>> %s: %s:\nOUT:\n%s\nERR:\n%s\n" % (
             time.ctime(), client.hostname, out, err), file=file)
 
 
@@ -65,10 +67,11 @@ def run(request):
     """
     /run
     """
-    command = request.POST['command']
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        executor.map(lambda client: run_command(client, command), CLIENTS.values())
-    return Response('OK\r\n')
+    with RUN_LOCK:
+        command = request.POST['command']
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(lambda client: run_command(client, command), CLIENTS.values())
+        return Response('OK\r\n')
 
 
 @view_config(route_name='register', request_method='POST')
