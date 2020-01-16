@@ -23,6 +23,7 @@ from paramiko.ssh_exception import SSHException
 PORT = 9999
 CLIENTS = {}
 RUN_LOCK = threading.RLock()
+WORKERS = 8
 
 
 class Client:
@@ -67,7 +68,8 @@ def run(request):
     """
     with RUN_LOCK:
         command = request.POST['command']
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+                max_workers=WORKERS) as executor:
             executor.map(lambda c: run_command(c, command), CLIENTS.values())
         return Response('OK\r\n')
 
