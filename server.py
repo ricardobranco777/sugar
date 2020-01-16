@@ -20,10 +20,18 @@ import paramiko
 from paramiko.ssh_exception import SSHException
 
 
-PORT = 9999
+try:
+    PORT = os.environ['PORT']
+except KeyError:
+    PORT = 9999
+
+try:
+    WORKERS = os.environ['WORKERS']
+except KeyError:
+    WORKERS = 8
+
 CLIENTS = {}
 RUN_LOCK = threading.RLock()
-WORKERS = 8
 
 
 class Client:
