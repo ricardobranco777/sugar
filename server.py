@@ -43,16 +43,16 @@ class Client:
     """
     Client class
     """
-    def __init__(self, hostname, username="root", password=None):
-        self.hostname = hostname
+    def __init__(self, address, username="root", password=None):
+        self.address = address
         self.ssh = paramiko.SSHClient()
         self.ssh.load_system_host_keys()
         self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy)
         self.ssh.connect(
-            hostname=hostname, username=username, password=password)
+            hostname=address, username=username, password=password)
 
     def __del__(self):
-        logging.info("Closing connection to %s", self.hostname)
+        logging.info("Closing connection to %s", self.address)
         self.ssh.close()
 
     def run_command(self, command):
@@ -69,9 +69,9 @@ def run_command(client, command):
     Run command on a client and log stdout & stderr
     """
     out, err = client.run_command(command)
-    with open("%s.txt" % client.hostname, "a") as file:
+    with open("%s.txt" % client.address, "a") as file:
         print(">>> %s: %s:\nOUT:\n%s\nERR:\n%s\n" % (
-            time.ctime(), client.hostname, out, err), file=file)
+            time.ctime(), client.address, out, err), file=file)
 
 
 @view_config(route_name='run', request_method='POST')
@@ -93,16 +93,10 @@ def register(request):
     /register
     """
     id_ = request.POST['id']
-    try:
-        address = request.POST['address']
-    except KeyError:
-        address = request.client_addr
-    try:
-        username = request.POST['username']
-    except KeyError:
-        username = "root"
+    address = request.POST.get('address', request.client_addr)
+    username = request.POST.get('username')
     if id_ in CLIENTS:
-        if address != CLIENTS[id_].hostname:
+        if address != CLIENTS[id_].address:
             del CLIENTS[id_]
     else:
         try:
