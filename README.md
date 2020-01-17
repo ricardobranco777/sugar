@@ -15,6 +15,11 @@ Sugar lets you run commands on registered clients.
 
 The server is running on the 9999 port by default.
 
+Optional environment variables:
+- `PORT`: Specify another port.
+- `LOGGING`: Default logging level.  Must be `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`.
+- `WORKERS`: Maximum number of thread workers for the `/run` endpoint.  Default is 8.
+
 2. On each client:
 
 Make sure to install the server's SSH public key. This can be done from the server like this:
