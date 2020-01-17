@@ -92,7 +92,12 @@ def register(request):
     """
     /register
     """
-    id_ = request.POST['id']
+    try:
+        id_ = request.POST['id']
+    except KeyError:
+        response = Response('Missing id parameter')
+        response.status_int = 400
+        return response
     address = request.POST.get('address', request.client_addr)
     username = request.POST.get('username')
     if id_ in CLIENTS:
