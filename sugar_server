@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+
+"""
+Main cli executable wrapper
+"""
+import sys
+from sugar import _cli
+
+
+try:
+    _cli.main()
+except KeyboardInterrupt:
+    sys.exit(0)

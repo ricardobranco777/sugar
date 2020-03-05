@@ -1,3 +1,3 @@
 test:
 	@flake8
-	@pylint *.py
+	@pylint sugar sugar_server
