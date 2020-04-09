@@ -11,7 +11,9 @@ Sugar lets you run commands on registered clients.
 
 1. On the server:
 
-`python3 server.py`
+### Using the command line interface
+
+`./sugar_server`
 
 The server is running on the 9999 port by default.
 
@@ -19,6 +21,24 @@ Optional environment variables:
 - `PORT`: Specify another port.
 - `LOGGING`: Default logging level.  Must be `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`.
 - `WORKERS`: Maximum number of thread workers for the `/run` endpoint.  Default is 8.
+
+### Using Sugar as a Python library
+
+It is expected that Sugar is installed correctly in the Python library path on your machine.
+
+```python
+import sugar #Import the sugar module
+
+sugar_server = sugar.Server(<WORKERS>, <PORT>) #Create a new sugar server object
+sugar_server.serve() #Run the sugar server
+```
+
+```python
+import sugar #Import the sugar module
+
+sugar_client = Client(<ADDRESS>)
+sugar_client.run_command(<COMMAND>)
+```
 
 2. On each client:
 

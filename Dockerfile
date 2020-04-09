@@ -10,11 +10,12 @@ RUN	zypper -n install -y --no-recommends \
 		python3-pyramid && \
 	zypper -n clean -a
 
-COPY	*.py /
+COPY	sugar /sugar
+COPY	sugar_server /
 
 ENV     PYTHONPATH /
 ENV	PYTHONUNBUFFERED 1
 
 EXPOSE	9999
 
-ENTRYPOINT ["/usr/bin/python3", "/server.py"]
+ENTRYPOINT ["/usr/bin/python3", "/sugar_server"]
