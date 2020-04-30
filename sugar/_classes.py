@@ -7,7 +7,7 @@ import logging
 import sys
 import time
 import threading
-import concurrent.futures as con_futur
+from concurrent.futures import ThreadPoolExecutor as Executor
 
 from wsgiref.simple_server import make_server
 from pyramid.config import Configurator
@@ -66,8 +66,7 @@ class Server:
         """
         with self._rlock:
             command = request.POST['command']
-            with con_futur.ThreadPoolExecutor(max_workers=self._workers) \
-                    as executor:
+            with Executor(max_workers=self._workers) as executor:
                 executor.map(lambda c: run_command(c, command),
                              self._clients.values())
             return Response('OK\r\n')
