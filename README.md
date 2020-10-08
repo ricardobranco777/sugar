@@ -2,6 +2,8 @@
 
 Sugar lets you run commands on registered clients.
 
+[![Build Status](https://travis-ci.org/ricardobranco777/sugar.svg?branch=master)](https://travis-ci.org/ricardobranco777/sugar)
+
 ## Python dependencies:
 
 - paramiko
